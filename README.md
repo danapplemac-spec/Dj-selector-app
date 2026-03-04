@@ -87,6 +87,24 @@ sudo apt-get install -y portaudio19-dev libsndfile1
 ### App runs but analysis says unavailable
 Analysis is optional at startup. The app now emits an analysis error event and continues running if `librosa` is missing. Install full requirements to enable BPM/key/waveform analysis.
 
+## Windows packaging (EXE + installer)
+You can now build a portable EXE and installer for Windows:
+
+```powershell
+./scripts/build-windows-package.ps1 -Version 0.1.0
+```
+
+Requirements:
+- run `./scripts/dev-setup-windows.ps1` first
+- install Inno Setup 6 (`ISCC.exe`)
+
+CI release workflow:
+- `.github/workflows/windows-release.yml`
+- triggers on tags `v*` and `workflow_dispatch`
+- uploads portable app + installer artifacts
+
+See `docs/RELEASE_WINDOWS.md` for full release steps.
+
 ## CI
 GitHub Actions workflow includes:
 - Linux test job for Python modules (`pytest`).

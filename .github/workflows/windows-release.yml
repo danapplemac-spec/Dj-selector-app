@@ -1,0 +1,49 @@
+name: Windows Build & Installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Bootstrap development environment
+        shell: powershell
+        run: |
+          ./scripts/dev-setup-windows.ps1 -SkipWinget
+
+      - name: Install Inno Setup
+        shell: powershell
+        run: |
+          choco install innosetup -y --no-progress
+
+      - name: Build EXE and installer
+        shell: powershell
+        run: |
+          $ver = "${{ github.ref_name }}"
+          if ($ver -match '^v') { $ver = $ver.Substring(1) }
+          if ([string]::IsNullOrWhiteSpace($ver)) { $ver = "0.1.0-dev" }
+          ./scripts/build-windows-package.ps1 -Version $ver
+
+      - name: Upload portable bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DJSelector-portable
+          path: dist/DJSelector
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DJSelector-installer
+          path: installer/windows/output/*.exe
