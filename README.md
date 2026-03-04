@@ -15,6 +15,39 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+## Windows one-command bootstrap (PowerShell)
+From the repo root:
+
+```powershell
+./scripts/dev-setup-windows.ps1
+```
+
+If your system blocks local scripts, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\dev-setup-windows.ps1
+```
+
+Or use the batch wrapper:
+
+```bat
+scripts\dev-setup-windows.bat
+```
+
+What this does:
+- checks Python launcher (`py`)
+- optionally tries to install `libsndfile` via `winget`
+- creates `.venv`
+- upgrades pip tooling
+- installs `requirements.txt`
+
+Optional flags:
+
+```powershell
+./scripts/dev-setup-windows.ps1 -SkipWinget
+./scripts/dev-setup-windows.ps1 -SkipPipInstall
+```
+
 ## 2) Start the app
 ```bash
 python main.py
