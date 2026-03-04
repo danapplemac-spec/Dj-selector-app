@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import threading
 import tkinter as tk
 from pathlib import Path
@@ -15,7 +16,10 @@ class DJApp:
         self.root = root
         self.root.title("DJ Selector MVP")
         self.controller = DJApiController(Path("library.db"))
-        self.controller.start_audio()
+        self.audio_started = False
+        if os.getenv("DJ_SKIP_AUDIO") != "1":
+            self.controller.start_audio()
+            self.audio_started = True
         self._build_ui()
         self._bind_keys()
         threading.Thread(target=start_midi_listener, args=(self.dispatch,), daemon=True).start()
@@ -152,7 +156,16 @@ class DJApp:
 def run() -> None:
     root = tk.Tk()
     app = DJApp(root)
-    root.protocol("WM_DELETE_WINDOW", lambda: (app.controller.stop_audio(), root.destroy()))
+
+    if os.getenv("DJ_APP_SMOKETEST") == "1":
+        root.after(2000, root.destroy)
+
+    def _shutdown() -> None:
+        if app.audio_started:
+            app.controller.stop_audio()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", _shutdown)
     root.mainloop()
 
 

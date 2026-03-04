@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-linux:
+    name: Linux tests (Python modules)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  windows-bootstrap-and-smoke:
+    name: Windows bootstrap + smoke startup
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Windows bootstrap script
+        shell: powershell
+        run: |
+          ./scripts/dev-setup-windows.ps1 -SkipWinget
+
+      - name: Smoke-check python main.py startup
+        shell: powershell
+        run: |
+          $env:DJ_SKIP_AUDIO = "1"
+          $env:DJ_APP_SMOKETEST = "1"
+          $proc = Start-Process -FilePath ".\.venv\Scripts\python.exe" -ArgumentList "main.py" -PassThru
+          Start-Sleep -Seconds 5
+          if ($proc.HasExited) {
+            throw "main.py exited early with code $($proc.ExitCode)"
+          }
+          Stop-Process -Id $proc.Id -Force

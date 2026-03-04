@@ -87,6 +87,11 @@ sudo apt-get install -y portaudio19-dev libsndfile1
 ### App runs but analysis says unavailable
 Analysis is optional at startup. The app now emits an analysis error event and continues running if `librosa` is missing. Install full requirements to enable BPM/key/waveform analysis.
 
+## CI
+GitHub Actions workflow includes:
+- Linux test job for Python modules (`pytest`).
+- Windows job that runs `scripts/dev-setup-windows.ps1` and smoke-checks `python main.py` startup in CI mode.
+
 ## Features
 - Two decks (A/B): load, play/pause, cue, seek, tempo, gain, key-lock flag.
 - Mixer: crossfader, per-deck volume, 3-band EQ values, master gain.
